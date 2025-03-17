@@ -32,6 +32,3 @@ Thumbs.db
 # Local development settings
 *.log
 .env.local
-
-# Do NOT ignore vectorstore directory
-!vectorstore/
