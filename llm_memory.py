@@ -35,8 +35,11 @@ print("Length of Text Chunks: ", len(text_chunks))
 # Step 3: Create Vector Embeddings 
 
 def get_embedding_model():
-    embedding_model=HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2",
-                                         show_progress=True)
+    embedding_model = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        show_progress=True,
+        encode_kwargs={'device': 'cpu'}  # Force CPU usage
+    )
     return embedding_model
 
 embedding_model=get_embedding_model()

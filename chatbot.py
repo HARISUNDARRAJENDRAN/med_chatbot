@@ -10,7 +10,10 @@ DB_FAISS_PATH = "vectorstore/db_faiss"
 
 @st.cache_resource
 def get_vectorstore():
-    embedding_model = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+    embedding_model = HuggingFaceEmbeddings(
+        model_name='sentence-transformers/all-MiniLM-L6-v2',
+        encode_kwargs={'device': 'cpu'}  # Force CPU usage
+    )
     db = FAISS.load_local(DB_FAISS_PATH, embedding_model, allow_dangerous_deserialization=True)
     return db
 
@@ -21,8 +24,9 @@ def load_llm(huggingface_repo_id, HF_TOKEN):
     return HuggingFaceEndpoint(
         repo_id=huggingface_repo_id,
         temperature=0.5,
-        model_kwargs={"token": HF_TOKEN, "max_length": "512"}
+        model_kwargs={"token": HF_TOKEN, "max_length": "512", "device": "cpu"}  # Force CPU usage
     )
+
 
 def reset_chat():
     """Saves the current chat to history and starts a new one."""
