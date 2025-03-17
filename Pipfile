@@ -11,6 +11,8 @@ faiss-cpu = "*"
 pypdf = "*"
 streamlit = "*"
 cryptography = "*"
+streamlit-webrtc = "*"
+speechrecognition = "*"
 
 [dev-packages]
 
