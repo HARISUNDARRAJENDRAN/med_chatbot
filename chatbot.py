@@ -1,17 +1,29 @@
 import os
+import sys
+
+# Force CPU mode - add these before other imports
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["USE_CPU"] = "1" 
+os.environ["FORCE_CPU"] = "1"
+os.environ["TORCH_DEVICE"] = "cpu"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
+# Check if .no_cuda exists (created by fix_cuda.py)
+if os.path.exists(".no_cuda"):
+    print("Running in CPU-only mode")
+
+# Now import the rest of your libraries
 import streamlit as st
 from datetime import datetime
+import torch
+if hasattr(torch, 'cuda'):
+    torch.cuda.is_available = lambda: False
+
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
 from langchain_huggingface import HuggingFaceEndpoint
-
-# 🛑 Force CPU mode (Disable GPU dependencies)
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-os.environ["USE_CPU"] = "1"
-os.environ["FORCE_CPU"] = "1"
-os.environ["TORCH_DEVICE"] = "cpu"
 
 DB_FAISS_PATH = "vectorstore/db_faiss"
 
