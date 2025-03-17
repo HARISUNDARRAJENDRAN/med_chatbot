@@ -1,6 +1,5 @@
 # Data folder
 data/
-vectorstore/
 
 # Python virtual environment
 venv/
