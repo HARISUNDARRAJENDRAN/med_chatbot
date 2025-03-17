@@ -6,13 +6,19 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
 from langchain_huggingface import HuggingFaceEndpoint
 
+# Force CPU usage and disable GPU
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["USE_CPU"] = "1"
+os.environ["FORCE_CPU"] = "1"
+os.environ["TORCH_DEVICE"] = "cpu"
+
 DB_FAISS_PATH = "vectorstore/db_faiss"
 
 @st.cache_resource
 def get_vectorstore():
     embedding_model = HuggingFaceEmbeddings(
         model_name='sentence-transformers/all-MiniLM-L6-v2',
-        encode_kwargs={'device': 'cpu'}  # Force CPU usage
+        encode_kwargs={'device': 'cpu', 'use_gpu': False}
     )
     db = FAISS.load_local(DB_FAISS_PATH, embedding_model, allow_dangerous_deserialization=True)
     return db
@@ -24,7 +30,12 @@ def load_llm(huggingface_repo_id, HF_TOKEN):
     return HuggingFaceEndpoint(
         repo_id=huggingface_repo_id,
         temperature=0.5,
-        model_kwargs={"token": HF_TOKEN, "max_length": "512", "device": "cpu"}  # Force CPU usage
+        model_kwargs={
+            "token": HF_TOKEN,
+            "max_length": "512",
+            "device": "cpu",
+            "use_gpu": False
+        }
     )
 
 
