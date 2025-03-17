@@ -1,17 +1,31 @@
 import os
 import streamlit as st
 from datetime import datetime
+
+# Force CPU mode more aggressively - add these before other imports
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["USE_CPU"] = "1"
+os.environ["FORCE_CPU"] = "1"
+os.environ["TORCH_DEVICE"] = "cpu"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
+# Now import the ML libraries
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
 from langchain_huggingface import HuggingFaceEndpoint
 
-# 🛑 Force CPU mode (Disable GPU dependencies)
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-os.environ["USE_CPU"] = "1"
-os.environ["FORCE_CPU"] = "1"
-os.environ["TORCH_DEVICE"] = "cpu"
+# Try to explicitly import and configure torch for CPU
+try:
+    import torch
+    torch.set_num_threads(1)
+    if hasattr(torch, 'cuda'):
+        torch.cuda.is_available = lambda: False
+except:
+    pass
 
 DB_FAISS_PATH = "vectorstore/db_faiss"
 
@@ -19,9 +33,14 @@ DB_FAISS_PATH = "vectorstore/db_faiss"
 def get_vectorstore():
     """Loads the FAISS vector store with sentence embeddings."""
     try:
+        # More explicit CPU configuration
         embedding_model = HuggingFaceEmbeddings(
             model_name='sentence-transformers/all-MiniLM-L6-v2',
-            encode_kwargs={'device': 'cpu', 'use_gpu': False}
+            encode_kwargs={
+                'device': 'cpu',
+                'use_gpu': False,
+                'normalize_embeddings': True  # Add this for stability
+            }
         )
         db = FAISS.load_local(DB_FAISS_PATH, embedding_model, allow_dangerous_deserialization=True)
         return db
